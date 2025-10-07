@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Semillero de Redes Neuronales</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Orbitron', monospace;
+      background-color: #000;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 60px 24px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    nav {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 80px;
+    }
+    nav a {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    nav a:hover {
+      color: #fff;
+    }
+    main {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 80px;
+    }
+    section h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    footer {
+      margin-top: 100px;
+      color: #444;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    canvas {
+      display: block;
+      margin: 40px auto;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Semillero de Redes Neuronales</h1>
+    <canvas id="nnCanvas" width="600" height="300"></canvas>
+  </header>
+
+  <nav>
+    <a href="#sobre">Sobre</a>
+    <a href="#exposiciones">Exposiciones</a>
+    <a href="#recursos">Recursos</a>
+    <a href="#bibliografia">Bibliografía</a>
+    <a href="#videos">Videos</a>
+  </nav>
+
+  <main>
+    <section id="sobre"><h2>Sobre el semillero</h2></section>
+    <section id="exposiciones"><h2>Exposiciones de los integrantes</h2></section>
+    <section id="recursos"><h2>Recursos</h2></section>
+    <section id="bibliografia"><h2>Bibliografía</h2></section>
+    <section id="videos"><h2>Videos del semillero</h2></section>
+  </main>
+
+  <footer>
+    © Semillero de Redes Neuronales
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('nnCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const layers = [3, 5, 4, 2]; // simple NN architecture
+    const positions = [];
+
+    // compute node positions
+    const width = canvas.width;
+    const height = canvas.height;
+    const layerSpacing = width / (layers.length + 1);
+
+    for (let i = 0; i < layers.length; i++) {
+      const nodes = [];
+      const nodeSpacing = height / (layers[i] + 1);
+      for (let j = 0; j < layers[i]; j++) {
+        nodes.push({
+          x: layerSpacing * (i + 1),
+          y: nodeSpacing * (j + 1),
+          activated: false
+        });
+      }
+      positions.push(nodes);
+    }
+
+    function drawNetwork(progress) {
+      ctx.clearRect(0, 0, width, height);
+
+      // draw connections
+      for (let i = 0; i < positions.length - 1; i++) {
+        for (let a of positions[i]) {
+          for (let b of positions[i + 1]) {
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.stroke();
+          }
+        }
+      }
+
+      // highlight activated path
+      const activeLayer = Math.floor(progress * (positions.length - 1));
+      if (activeLayer < positions.length - 1) {
+        for (let a of positions[activeLayer]) {
+          for (let b of positions[activeLayer + 1]) {
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = 'rgba(0,200,255,' + (1 - 0.5 * Math.random()) + ')';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // draw nodes
+      for (let i = 0; i < positions.length; i++) {
+        for (let node of positions[i]) {
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 8, 0, 2 * Math.PI);
+          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          ctx.fill();
+        }
+      }
+    }
+
+    let t = 0;
+    function animate() {
+      drawNetwork(Math.abs(Math.sin(t)));
+      t += 0.02;
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
